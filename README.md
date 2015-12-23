@@ -4,9 +4,9 @@
  
 # Useful links:
 
-**Github Page** For Project: https://github.com/siawjl/MachineLearning
+**Github Page** For Project: https://github.com/jlsiaw/MachineLearning
 
-**gh-page branch** for Project Report:  http://github.com/siawjl/MachineLearning/blob/master/PMLProject.html  
+**gh-page branch** for Project Report:  http://github.com/jlsiaw/MachineLearning/blob/master/PMLProject.html  
 
 # Background
 
