@@ -6,7 +6,7 @@ output: html_document
 ---
 
 # Overview
-This project is to predict the execution type of an the weight lifting exercise. Participants did Unilateral Dumbbell Biceps Curl activities that can be classified into 5 execution types: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). We use any of the other variables in train data subset to build model and do cross-validation. Fitted model is used to predict the execution type, "classe" variable. Please see the website http://groupware.les.inf.puc-rio.br/har for more information.
+This project is to predict the execution type of an the weight lifting exercise. Participants did Unilateral Dumbbell Biceps Curl activities that can be classified into 5 execution types: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). We use any of the other variables in train data subset to build model and do cross-validation. Fitted model is used to predict the execution type, "classe" variable. Please see the website http://groupware.les.inf.puc-rio.br/har for more information. 
 
 # Data Exploration
 Firstly, data is loaded into train and test variables. Train dataset is used for model building and cross-validation. Whereas test dataset is reserved for the prediction in final submission.
