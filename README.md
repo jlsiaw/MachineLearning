@@ -24,6 +24,6 @@
  
  The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment. 
  
- ## Project Goals
+## Project Goals
  
  The goal of our project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. We also created a report describing the data pattern, how we built our model, how we applied cross validation, and what we think the expected out of sample error is, and why we made the choices we did. We also use our prediction model to predict 20 different test cases. 
