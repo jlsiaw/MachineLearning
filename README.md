@@ -6,7 +6,8 @@
 
 **Github Page** For Project: https://github.com/jlsiaw/MachineLearning
 
-**gh-page branch** for Project Report:  http://github.com/jlsiaw/MachineLearning/blob/master/PMLProject.html  
+Use this full html file for assessment
+**gh-page branch** for Project Report:  **http://jlsiaw.github.io/MachineLearning/PMLProject.html**
 
 # Background
 
