@@ -1,0 +1,136 @@
+---
+title: 'Practical Machine Learning Project: Weight Lifting Exercises'
+author: "JL.S"
+date: "Friday, December 18, 2015"
+output: html_document
+---
+
+# Overview
+This project is to predict the execution type of an the weight lifting exercise. Participants did Unilateral Dumbbell Biceps Curl activities that can be classified into 5 execution types: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). We use any of the other variables in train data subset to build model and do cross-validation. Fitted model is used to predict the execution type, "classe" variable. Please see the website http://groupware.les.inf.puc-rio.br/har for more information.
+
+# Data Exploration
+Firstly, data is loaded into train and test variables. Train dataset is used for model building and cross-validation. Whereas test dataset is reserved for the prediction in final submission.
+
+```{r warning=FALSE, message=FALSE}
+library(caret)
+
+train <- read.csv("pml-training.csv")
+test  <- read.csv("pml-testing.csv")
+
+# find variables with almost zero variation
+nzv <- nearZeroVar(train)
+
+# exclude nzv variables
+pTrain <- train[ ,-nzv]
+
+# find variables with total NA higher than 75% 
+highNA <- sapply(pTrain, function(x) mean(is.na(x))) > 0.75
+
+# exclude high NA variables
+pTrain <- pTrain[ , highNA==F]
+
+# exclude first six variables which do not relate to movements 
+pTrain <- pTrain[ , -(1:6)]
+
+# slice train data into 60:40 for model building
+set.seed(106)
+inTrain <- createDataPartition(y= pTrain$classe, p= 0.6, list= F)
+oTraining <- pTrain[inTrain, ]
+oValidation <- pTrain[-inTrain, ]
+
+# standardized train data with preProcess function
+# which(colnames(oTraining)=="classe")
+preObj <- preProcess(oTraining[,-53], method=c("center","scale"))
+training <- predict(preObj, oTraining)
+validation <- predict(preObj, oValidation)
+```
+
+Initial train dataset contains 19622 rows and 160 columns. Whereas test dataset contains 20 rows and 160 columns. Data fileds have nearly no variation or have higher than 75% of missing value are removed. In addition, data fileds not relate to movement activity are also discarded. This results in only 53 columns for next process. We later split train dataset with 60/40 ratio for model building and test accuracy validating.
+
+Before building a model, it is a good practice to understand the behaviour of data with density plot. Data is standardized first before exploring. Due to the target "classe" is categorized variable, violin plot is more appropriate here. With ordinary density curves, it is difficult to compare more than just a few distributions because the lines visually interfere with each other. With a violin plot, it's easier to compare several distributions since they're placed side by side. Density plots help us to detect where data is concentrated, which data can be ignored, any strange distributions. For example, Figure 1 shows that all remaining variables have some level of distribution that may help in our model building.
+
+```{r, echo=FALSE, fig.height=11, fig.width=10, warning=FALSE, message=FALSE}
+library(reshape2)
+
+violinPlot <- function (data, regex) {
+    n <- ncol(data)
+    if (regex=="ALL") 
+        col <- c(1:n-1)
+    else if (is.numeric(regex))
+        col <- c(regex)
+    else
+        col <- grep(regex, names(data))
+    
+    col <- c(col, which(names(data) == "classe"))
+    dm <- melt(data[col], id.vars="classe")
+    ggplot(dm, aes(x=classe, y=value)) + 
+        geom_violin(aes(color=classe, fill=classe), alpha= 0.5) + 
+        facet_wrap(~ variable, scale="free_y", ncol=6) +
+        ggtitle("Figure 1: Standardized Density Plot for classe vs variables") +
+        labs(x="", y="") +
+        theme(legend.position="none")
+    }
+
+violinPlot(training, "ALL")
+#violinPlot(training, 1:52)
+#violinPlot(training, "belt")
+```
+
+# Model Building
+Many different models are available for machine learning. In this project, random Forest function is selected to build classification trees. Random Forest is chosen because it is one of the two top performing algorithms along with boosting in prediction contests. It will be a very good model if the out of sample error rate is less than 1%.
+
+The creators of the Random Forest algorithm stated that "In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error". Therefore, only simple cross-validation is performed using the subset of training data, mainly to obtain the out of sample error rate.
+
+```{r warning=FALSE, message=FALSE}
+library(randomForest)
+
+# train model
+# randomForest() can run the same algorithm much faster than rf method in train()
+set.seed(1106)
+rForestModel <- randomForest(classe ~ ., data= training, 
+                             ntree= 500, importance= TRUE)
+rForestModel
+
+plot(rForestModel, main="Figure 2: Random Forest Error Rate vs Number of Trees")
+```
+
+In summary, OOB error rate, class error rate and error ratio (Figure 2) show that values are all very low.
+
+# Model Validating
+A smaller portion of training data in validation variable is used to validate out of sample error. The statistics summary depicts how good is the model in predicting outcome "classe".
+
+```{r warning=FALSE, message=FALSE}
+# use fitted model to predict classe in validation set
+vrForest <- predict(rForestModel, validation)
+
+# show confusion matrix to get estimate of out-of-sample error
+confusionMatrix(validation$classe, vrForest)
+```
+The accuracy is **99.22%**, thus my predicted accuracy for the out-of-sample error is **0.78%**.
+
+This is an excellent result, so rather than trying with other algorithms, I will use Random Forests to predict on the test set.
+
+# Predicting Results on the Test Data
+Model fitted on training dataset is now used to predict the execution type, "classe"" from raw test data.
+
+```{r warning=FALSE, message=FALSE}
+# standardized test dataset with preprocess object
+testing <- predict(preObj, test)
+
+# use fitted model to predict classe type with full testing set
+result <- predict(rForestModel, testing)
+result
+
+# create function to write predictions to files
+pml_write_files <- function(x) {
+    n <- length(x)
+    for(i in 1:n) {
+        filename <- paste0("problem_id_", i, ".txt")
+        write.table(x[i], file=filename, quote=F, row.names=F, col.names=F)
+    }
+}
+
+# create prediction files to submit
+pml_write_files(result)
+```
+
